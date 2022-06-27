@@ -22,6 +22,7 @@ void seedUsrs() {
         User new_user;
         usrsfile >> new_user.id >> new_user.user_name >> new_user.password
                  >> new_user.name >> new_user.email >> new_user.allow_aq;
+        if (new_user.id == 0) break;
         users.push_back(new_user);
     }
 
@@ -45,7 +46,7 @@ int menu() {
     }
     return choice;
 }
-int userMenu() {
+int userMenu(int id) {
     int choice = -1;
     while (choice == -1) {
         cout << "\nMenu:" << endl;
@@ -69,7 +70,28 @@ int userMenu() {
     return choice;
 }
 
-void signUp() {
+int logIn() {
+   while (true) {
+        cout << "Enter user name & password: ";
+        string user_name, password;
+        cin >> user_name >> password;
+        int id{};
+        for (const auto &user: users) {
+            if (user.user_name == user_name && user.password == password) {
+                id = user.id;
+                break;
+            }
+        }
+        if (id == 0) {
+            cout << "Invalid username or password...\n"
+                 << "please try again.\n";
+            continue;
+        } else
+            return id;
+    }
+}
+
+int signUp() {
         string user_name, password, name, email;
         bool allow_aq;
         int id;
@@ -99,19 +121,39 @@ void signUp() {
 
         usrsfile.close();
 
-        userMenu();
+        return id;
 }
 
+void listUsers() {
+    for (const auto user: users) {
+        cout << "ID: " << user.id
+            << "\tNamw: " << user.name
+            << endl;
+    }
+}
 
+void askSystem(int id) {
+    while (true) {
+        int choice = userMenu(id);
+
+        if (choice == 6)
+            listUsers();
+        else if (choice == 8)
+            break;
+    }
+}
 
 void system() {
     while (true) {
         int choice = menu();
-
+        int id = 0;
         if (choice == 1)
-            signUp();
-/*        else
-            signUp();*/
+            id = logIn();
+        else if (choice == 2)
+            id = signUp();
+        else
+            break;
+        if (id) askSystem(id);
     }
 }
 
@@ -121,7 +163,3 @@ int main() {
     cout << "Hello world!";
     return 0;
 }
-
-/*
- * each user has name , password , email , allow AQ
- */
