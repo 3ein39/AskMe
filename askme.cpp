@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 
+// Defining user struct
 struct User {
     int id {};
     string user_name {};
@@ -9,7 +10,23 @@ struct User {
     string email {};
     bool allow_aq {};
 };
+
+// seeding users to a vector from users.txt
 vector<User> users;
+
+void seedUsrs() {
+    ifstream usrsfile;
+    usrsfile.open("./users.txt");
+
+    while (!usrsfile.eof()) {
+        User new_user;
+        usrsfile >> new_user.id >> new_user.user_name >> new_user.password
+                 >> new_user.name >> new_user.email >> new_user.allow_aq;
+        users.push_back(new_user);
+    }
+
+    usrsfile.close();
+}
 
 int menu() {
     int choice = -1;
@@ -76,9 +93,9 @@ void signUp() {
         ofstream usrsfile;
         usrsfile.open("./users.txt", ofstream ::app);
 
-        usrsfile << id << ',' <<user_name <<','<< password
-                << ',' <<name << ','<< email
-                <<',' <<allow_aq << endl;
+        usrsfile << id << ' ' <<user_name <<' '<< password
+                << ' ' <<name << ' '<< email
+                <<' ' <<allow_aq << endl;
 
         usrsfile.close();
 
@@ -99,6 +116,7 @@ void system() {
 }
 
 int main() {
+    seedUsrs();
     system();
     cout << "Hello world!";
     return 0;
