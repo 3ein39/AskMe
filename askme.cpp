@@ -9,6 +9,8 @@ struct User {
     string name {};
     string email {};
     bool allow_aq {};
+    vector<int> questions_by_me; // storing ids of sent questions
+    vector<int> questions_to_me; // storing ids of received questions
 };
 
 // Defining question struct
@@ -40,6 +42,14 @@ void seedUsrs() {
 // seeding questions from questions.txt
 vector<Question> questions;
 
+User& findUserById(int id) {
+    for (auto & u: users) {
+        if (id == u.id) {
+            return u;
+        }
+    }
+}
+
 void seedQs() {
     ifstream qsfile;
     qsfile.open("./questions.txt");
@@ -54,6 +64,12 @@ void seedQs() {
         getline(qsfile, new_question.answer,',');
 
         if (new_question.question.empty()) break; // handling the eof
+
+        User& sender = findUserById(new_question.sender_id);
+        sender.questions_by_me.push_back(new_question.question_id);
+
+        User& receiver = findUserById(new_question.receiver_id);
+        receiver.questions_to_me.push_back(new_question.question_id);
 
         questions.push_back(new_question);
     }
@@ -164,11 +180,18 @@ void listUsers() {
     }
 }
 
+void listQuestionsToMe(int id) {
+    const User& user = findUserById(id);
+    cout << user.questions_to_me[0] << endl;
+}
+
 void askSystem(int id) {
     while (true) {
         int choice = userMenu(id);
 
-        if (choice == 6)
+        if (choice == 1)
+            listQuestionsToMe(id);
+        else if (choice == 6)
             listUsers();
         else if (choice == 8)
             break;
