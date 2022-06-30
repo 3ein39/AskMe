@@ -53,6 +53,8 @@ void seedQs() {
         getline(qsfile, new_question.question, ',');
         getline(qsfile, new_question.answer,',');
 
+        if (new_question.question.empty()) break; // handling the eof
+
         questions.push_back(new_question);
     }
 
