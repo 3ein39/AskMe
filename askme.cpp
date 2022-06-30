@@ -11,6 +11,16 @@ struct User {
     bool allow_aq {};
 };
 
+// Defining question struct
+struct Question {
+    int question_id;
+    int sender_id;
+    int receiver_id;
+    bool is_anonymous_questions;
+    string question;
+    string answer;
+};
+
 // seeding users to a vector from users.txt
 vector<User> users;
 
@@ -25,8 +35,28 @@ void seedUsrs() {
         if (new_user.id == 0) break;
         users.push_back(new_user);
     }
-
     usrsfile.close();
+}
+// seeding questions from questions.txt
+vector<Question> questions;
+
+void seedQs() {
+    ifstream qsfile;
+    qsfile.open("./questions.txt");
+
+    while (!qsfile.eof()) {
+        Question new_question;
+
+        qsfile >> new_question.question_id >> new_question.sender_id
+            >> new_question.receiver_id >> new_question.is_anonymous_questions;
+
+        getline(qsfile, new_question.question, ',');
+        getline(qsfile, new_question.answer,',');
+
+        questions.push_back(new_question);
+    }
+
+    qsfile.close();
 }
 
 int menu() {
@@ -159,7 +189,7 @@ void system() {
 
 int main() {
     seedUsrs();
+    seedQs();
     system();
-    cout << "Hello world!";
     return 0;
 }
