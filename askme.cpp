@@ -309,6 +309,7 @@ bool askQuestion(int user_id){
     cout << "Enter User id or -1 to cancel: ";
     int id;
     cin >> id;
+    if (id == -1) return false;
     cout << "anonymous question? (1 = yes) (0 = no): ";
     bool is_aq;
     cin >> is_aq;
@@ -344,7 +345,19 @@ bool askQuestion(int user_id){
     sender.questions_by_me.push_back(new_question.question_id);
 
     LoadDatabase();
+    return true;
+}
 
+bool feed() {
+    for (const auto& q: questions) {
+        cout << "Question id: " << q.question_id;
+        if (!q.is_anonymous_questions)
+            cout << " from user id: " << q.sender_id;
+        cout << " to user id: " << q.receiver_id << endl;
+        cout << "\tQuestion:" << q.question << endl;
+        if (!q.answer.empty()) cout << "\tAnswer: " << q.answer << endl;
+        cout << endl;
+    }
 }
 
 void askSystem(int id) {
@@ -363,6 +376,8 @@ void askSystem(int id) {
             askQuestion(id);
         else if (choice == 6)
             listUsers();
+        else if (choice == 7)
+            feed();
         else if (choice == 8)
             break;
     }
