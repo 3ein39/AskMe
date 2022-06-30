@@ -58,6 +58,8 @@ void seedQs() {
     ifstream qsfile;
     qsfile.open("./questions.txt");
 
+    questions.clear();
+
     while (!qsfile.eof()) {
         Question new_question;
 
@@ -70,9 +72,11 @@ void seedQs() {
         if (new_question.question.empty()) break; // handling the eof
 
         User& sender = findUserById(new_question.sender_id);
+        sender.questions_by_me.clear();
         sender.questions_by_me.push_back(new_question.question_id);
 
         User& receiver = findUserById(new_question.receiver_id);
+        receiver.questions_to_me.clear();
         receiver.questions_to_me.push_back(new_question.question_id);
 
         questions.push_back(new_question);
@@ -268,6 +272,37 @@ bool answerQuestion(int user_id) {
         question.answer = answer;
     }
     LoadDatabase();
+    return true;
+}
+
+bool deleteQuestion(int user_id) {
+    int choice;
+
+    cout << "Enter Question id or -1 to cancel: ";
+    cin >> choice;
+
+    if (choice == -1) return false;
+
+    User& user = findUserById(user_id);
+    Question& question = findQuestionById(choice);
+
+    // checking if the entered question id is a question from the logged-in user
+    bool exist = false;
+    for (const auto& id: user.questions_by_me)
+        if (id == question.question_id) exist = true;
+    if (!exist) {
+        cout << "You cannot delete this question..\n";
+        return false;
+    } else {
+        for (auto it = questions.begin(); it != questions.end() ; ++it)
+            if ((*it).question_id == choice){
+                questions.erase(it);
+                user.questions_by_me.erase(find(user.questions_by_me.begin(), user.questions_by_me.end(), choice));
+
+                LoadDatabase();
+                return true;
+            }
+    }
 }
 
 void askSystem(int id) {
@@ -280,6 +315,8 @@ void askSystem(int id) {
             listQuestionsFromMe(id);
         else if (choice == 3)
             answerQuestion(id);
+        else if (choice == 4)
+            deleteQuestion(id);
         else if (choice == 6)
             listUsers();
         else if (choice == 8)
