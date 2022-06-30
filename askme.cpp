@@ -81,6 +81,20 @@ void seedQs() {
     qsfile.close();
 }
 
+void LoadDatabase() {
+    // updating the questions.txt file
+    // with our questions vector
+    ofstream qfile("questions.txt", ios::trunc);
+    for(const auto& q: questions){
+        qfile << q.question_id << " " << q.sender_id << " "
+            << q.receiver_id << " " << q.is_anonymous_questions
+            << q.question << ',' << q.answer << ',' << endl;
+    }
+    qfile.close();
+
+    seedQs();
+}
+
 int menu() {
     int choice = -1;
     while (choice == -1) {
@@ -189,9 +203,11 @@ void listQuestionsToMe(int id) {
 
     for (const auto& q_id: user.questions_to_me) {
         const Question& q = findQuestionById(q_id);
-        cout << "Question id: " << q.question_id
-            << " from user id: " << user.id << endl
-            << "\tQuestion: " << q.question << endl;
+        cout << "Question id: " << q.question_id;
+        if (!q.is_anonymous_questions)
+            cout << " from user id: " << q.sender_id << endl;
+        else cout << " anonymous question..\n";
+        cout << "\tQuestion:" << q.question << endl;
         if (!q.answer.empty()) cout << "\tAnswer: " << q.answer << endl;
         cout << endl;
     }
@@ -204,12 +220,54 @@ void listQuestionsFromMe(int id) {
         const Question& q = findQuestionById(q_id);
         cout << "Question id: " << q.question_id;
         if (q.is_anonymous_questions == 0) cout << " !AQ";
-        cout << " to user id: " << user.id << endl
+        cout << " to user id: " << q.receiver_id << endl
              << "\tQuestion:" << q.question << endl;
         if (!q.answer.empty()) cout << "\tAnswer: " << q.answer << endl;
         else cout << "\t NOT Answered Yet" << endl;
         cout << endl;
     }
+}
+
+bool answerQuestion(int user_id) {
+    int choice;
+
+    cout << "Enter Question id or -1 to cancel: ";
+    cin >> choice;
+
+    if (choice == -1) return false;
+
+    User& user = findUserById(user_id);
+    Question& question = findQuestionById(choice);
+
+    // checking if the entered question id is a question to the logged in user
+    bool exist = false;
+    for (const auto& id: user.questions_to_me)
+        if (id == question.question_id) exist = true;
+    if (!exist) {
+        cout << "You cannot answer this question..\n";
+        return false;
+    }
+
+    cout << "Question id: " << question.question_id
+         << " from user id: " << user.id << endl
+         << "\tQuestion:" << question.question << endl;
+
+    if (question.answer.empty()) {
+        cout << "\tEnter answer: ";
+        string answer;
+        cin >> ws; // handling !empty stream bug
+        getline(cin, answer); // updating vector of questions
+        question.answer = answer;
+    } else {
+        cout << "\tAnswer: " << question.answer << endl;
+        cout << "\nWarning: Already answered. Answer will be updated.\n"
+            << "Enter Answer: ";
+        string answer;
+        cin >> ws;
+        getline(cin, answer);
+        question.answer = answer;
+    }
+    LoadDatabase();
 }
 
 void askSystem(int id) {
@@ -220,6 +278,8 @@ void askSystem(int id) {
             listQuestionsToMe(id);
         else if (choice == 2)
             listQuestionsFromMe(id);
+        else if (choice == 3)
+            answerQuestion(id);
         else if (choice == 6)
             listUsers();
         else if (choice == 8)
