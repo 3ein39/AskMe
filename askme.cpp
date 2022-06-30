@@ -29,6 +29,7 @@ vector<User> users;
 void seedUsrs() {
     ifstream usrsfile;
     usrsfile.open("./users.txt");
+    users.clear();
 
     while (!usrsfile.eof()) {
         User new_user;
@@ -72,11 +73,9 @@ void seedQs() {
         if (new_question.question.empty()) break; // handling the eof
 
         User& sender = findUserById(new_question.sender_id);
-        sender.questions_by_me.clear();
         sender.questions_by_me.push_back(new_question.question_id);
 
         User& receiver = findUserById(new_question.receiver_id);
-        receiver.questions_to_me.clear();
         receiver.questions_to_me.push_back(new_question.question_id);
 
         questions.push_back(new_question);
@@ -96,6 +95,7 @@ void LoadDatabase() {
     }
     qfile.close();
 
+    seedUsrs();
     seedQs();
 }
 
@@ -305,6 +305,48 @@ bool deleteQuestion(int user_id) {
     }
 }
 
+bool askQuestion(int user_id){
+    cout << "Enter User id or -1 to cancel: ";
+    int id;
+    cin >> id;
+    cout << "anonymous question? (1 = yes) (0 = no): ";
+    bool is_aq;
+    cin >> is_aq;
+
+    User & receiver = findUserById(id);
+    User & sender = findUserById(user_id);
+
+    // checks if receiver allow anonymous questions
+    if (!receiver.allow_aq) {
+        cout << "Note: Anonymous questions are not allowed for this user\n";
+        is_aq = false;
+    }
+
+    cout << "Enter Question id or -1 to cancel: ";
+
+    Question new_question;
+    cin >> new_question.question_id;
+
+    if (new_question.question_id == -1) return false;
+
+    cout << "Enter question text: ";
+    cin >> ws;
+    getline(cin, new_question.question);
+    new_question.question = " " + new_question.question;
+
+    new_question.is_anonymous_questions = is_aq;
+    new_question.sender_id = sender.id;
+    new_question.receiver_id = receiver.id;
+
+    questions.push_back(new_question);
+
+    receiver.questions_to_me.push_back(new_question.question_id);
+    sender.questions_by_me.push_back(new_question.question_id);
+
+    LoadDatabase();
+
+}
+
 void askSystem(int id) {
     while (true) {
         int choice = userMenu(id);
@@ -317,6 +359,8 @@ void askSystem(int id) {
             answerQuestion(id);
         else if (choice == 4)
             deleteQuestion(id);
+        else if (choice == 5)
+            askQuestion(id);
         else if (choice == 6)
             listUsers();
         else if (choice == 8)
