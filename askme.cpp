@@ -43,11 +43,15 @@ void seedUsrs() {
 vector<Question> questions;
 
 User& findUserById(int id) {
-    for (auto & u: users) {
-        if (id == u.id) {
+    for (auto & u: users)
+        if (id == u.id)
             return u;
-        }
-    }
+}
+
+Question& findQuestionById(int id){
+    for (auto& q: questions)
+        if (id == q.question_id)
+            return q;
 }
 
 void seedQs() {
@@ -182,7 +186,30 @@ void listUsers() {
 
 void listQuestionsToMe(int id) {
     const User& user = findUserById(id);
-    cout << user.questions_to_me[0] << endl;
+
+    for (const auto& q_id: user.questions_to_me) {
+        const Question& q = findQuestionById(q_id);
+        cout << "Question id: " << q.question_id
+            << " from user id: " << user.id << endl
+            << "\tQuestion: " << q.question << endl;
+        if (!q.answer.empty()) cout << "\tAnswer: " << q.answer << endl;
+        cout << endl;
+    }
+}
+
+void listQuestionsFromMe(int id) {
+    const User& user = findUserById(id);
+
+    for (const auto& q_id: user.questions_by_me) {
+        const Question& q = findQuestionById(q_id);
+        cout << "Question id: " << q.question_id;
+        if (q.is_anonymous_questions == 0) cout << " !AQ";
+        cout << " to user id: " << user.id << endl
+             << "\tQuestion:" << q.question << endl;
+        if (!q.answer.empty()) cout << "\tAnswer: " << q.answer << endl;
+        else cout << "\t NOT Answered Yet" << endl;
+        cout << endl;
+    }
 }
 
 void askSystem(int id) {
@@ -191,6 +218,8 @@ void askSystem(int id) {
 
         if (choice == 1)
             listQuestionsToMe(id);
+        else if (choice == 2)
+            listQuestionsFromMe(id);
         else if (choice == 6)
             listUsers();
         else if (choice == 8)
