@@ -617,8 +617,11 @@ class UsersManager {
     }
 
     void listUsersNamesIds() const {
-        for (const auto &pair : username_userobject_map)
+        for (const auto &pair : username_userobject_map) {
+            if (pair.second.getName().empty())
+                continue;
             cout << "ID: " << pair.second.getUserId() << "\t\tName: " << pair.second.getName() << "\n";
+        }
     }
 
     pair<int, int> readUserId() const {
