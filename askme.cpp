@@ -1,4 +1,8 @@
-#include<bits/stdc++.h>
+#include<vector>
+#include<map>
+#include<fstream>
+#include<sstream>
+#include<iostream>
 using namespace std;
 
 // some helper methods
@@ -703,8 +707,7 @@ public:
         users_manager.accessSystem();
         resetCurrentUserQuestions();
 
-        int choice = -1;
-        while (choice == -1) {
+        while (true) {
                 cout << "\nMenu:" << endl;
                 cout << '\t' <<"1: Print questions to me\n";
                 cout << '\t' <<"2: Print questions from me\n";
@@ -716,6 +719,7 @@ public:
                 cout << '\t' <<"8: Logout\n";
 
                 cout << "Enter number in range 1 - 8: ";
+                int choice;
                 cin >> choice;
 
             loadDatabase(true);
@@ -742,8 +746,12 @@ public:
                 users_manager.listUsersNamesIds();
             else if (choice == 7)
                 questions_manager.listFeed();
+            else if (choice >= 1 && choice < 8)
+                choice = -1;
             else
                 break;
+
+
         }
 
         Run();	// Restart again
